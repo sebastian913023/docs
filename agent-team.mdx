@@ -1,0 +1,94 @@
+---
+title: "Four-agent build team"
+description: "A Scout, an Architect, two parallel Builders, and a Critic — and the three contracts that make them a team instead of four agents working alone"
+---
+
+Four agents are the easy part. What makes them a *team* is the three
+contracts written between them — the fixed handoff each agent hands the
+next, and nothing more. Skip the contracts and you get four capable
+agents that quietly re-derive, guess, or drop context at every boundary.
+
+<Tip>
+  Write the three contracts before you write the agents. The agents are
+  minutes of work; the boundaries are where the work goes missing.
+</Tip>
+
+## The team
+
+<Steps>
+  <Step title="Scout — claude-haiku-4-5-20251001">
+    Finds a real, evidence-backed opportunity. Cheap to triage, so this
+    is where the loop is allowed to be wrong most often — a bad find gets
+    caught downstream before real money is spent on it.
+  </Step>
+  <Step title="Architect — claude-opus-5">
+    Turns the opportunity into a spec with named interfaces and testable
+    acceptance criteria. This is the first of two places the loop pays
+    for a stronger model, because a vague spec here breaks everything
+    after it.
+  </Step>
+  <Step title="Builder ×2 (parallel) — claude-sonnet-5">
+    Two independent implementations of the same spec, run in parallel and
+    never shown each other's work. Disagreement between them is a signal
+    for the Critic, not a bug.
+  </Step>
+  <Step title="Critic — claude-opus-5">
+    Judges both diffs against the spec, not against each other's style,
+    and recommends a winner. The second place the loop pays for a
+    stronger model, because judging wrong here ships the wrong diff.
+  </Step>
+</Steps>
+
+## The three contracts
+
+Each contract is a template with required fields and a validation
+checklist the receiving agent checks before it starts work. An agent that
+gets an invalid contract sends it back with the specific gap named — it
+never fills the gap itself by guessing.
+
+<CardGroup cols={3}>
+  <Card title="01 — Scout → Architect" icon="magnifying-glass" href="https://github.com/sebastian913023/docs/blob/main/contracts/01-scout-to-architect.md">
+    Who ships this, and what they charge — the evidence that the
+    opportunity is real.
+  </Card>
+  <Card title="02 — Architect → Builder" icon="compass-drafting" href="https://github.com/sebastian913023/docs/blob/main/contracts/02-architect-to-builder.md">
+    The spec, with interfaces named precisely enough that two people could
+    implement it identically without talking to each other.
+  </Card>
+  <Card title="03 — Builder → Critic" icon="code-compare" href="https://github.com/sebastian913023/docs/blob/main/contracts/03-builder-to-critic.md">
+    A diff, plus a test for every acceptance criterion it claims to meet.
+  </Card>
+</CardGroup>
+
+## Cost, at this scale
+
+<Note>
+  These figures describe one run of this specific four-agent pattern —
+  they are not a general Claude API pricing guarantee. Always check
+  current published rates before relying on them for budgeting.
+</Note>
+
+| Agent | Model | Approx. cost per run |
+|---|---|---|
+| Scout | Haiku 4.5 | $0.30 |
+| Architect | Opus 5 | $0.55 |
+| Builder × 2 | Sonnet 5 | $0.95 |
+| Critic | Opus 5 | $0.40 |
+| **Total** | | **≈ $2.20 / run** |
+
+Run once a day, that's roughly $67/month — the cost of the loop was never
+the constraint; the missing contracts were.
+
+## Set it up in this repo
+
+The working files live at the repo root:
+
+- [`ROOT.md`](https://github.com/sebastian913023/docs/blob/main/ROOT.md) — the shared context every agent reads first.
+- [`.claude/agents/`](https://github.com/sebastian913023/docs/tree/main/.claude/agents) — the four Claude Code subagent definitions (`scout.md`, `architect.md`, `builder.md`, `critic.md`).
+- [`contracts/`](https://github.com/sebastian913023/docs/tree/main/contracts) — the three contract templates above.
+
+Each agent is a standard Claude Code subagent (frontmatter: `name`,
+`description`, `tools`, `model`) that reads `ROOT.md`, reads exactly one
+incoming contract, and writes exactly one outgoing contract. Invoke them
+in order for a build cycle, or trigger `scout` on a schedule to run the
+loop autonomously.
