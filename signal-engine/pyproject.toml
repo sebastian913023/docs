@@ -1,0 +1,18 @@
+[project]
+name = "kalshi15"
+version = "0.1.0"
+description = "Signal engine for Kalshi 15-minute crypto UP/DOWN markets"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2", "pandas>=2.2", "scipy>=1.13", "scikit-learn>=1.5", "requests>=2.32", "cryptography>=43", "joblib>=1.4"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+kalshi15 = "kalshi15.cli:main"
+
+[tool.setuptools]
+packages = ["kalshi15"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
