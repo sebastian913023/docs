@@ -1,0 +1,455 @@
+<title>Kalshi 15m Signal Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one dense desk. Signal hero (left) beside quote ticket (right), chart across, asset board and method notes beneath. */
+:root{
+  --bg:#0c1118; --panel:#131a24; --panel2:#18212d; --line:#263243; --fg:#e6ebf2; --mut:#8c99ab; --dim:#5d6a7c;
+  --accent:#6aa7d8; --up:#38c79a; --dn:#f0647a; --warn:#e3b341;
+  --up-bg:#38c79a1f; --dn-bg:#f0647a1f; --warn-bg:#e3b3411f; --accent-bg:#6aa7d81f;
+  --f-sans:"IBM Plex Sans",system-ui,sans-serif; --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f5; --line:#d5dbe4; --fg:#16202c; --mut:#566275; --dim:#7f8a9b;
+  --accent:#1f6fae; --up:#0f8a63; --dn:#c7334b; --warn:#a97a00;
+  --up-bg:#0f8a6317; --dn-bg:#c7334b17; --warn-bg:#a97a0017; --accent-bg:#1f6fae14; color-scheme:light;}}
+:root[data-theme="light"]{
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f5; --line:#d5dbe4; --fg:#16202c; --mut:#566275; --dim:#7f8a9b;
+  --accent:#1f6fae; --up:#0f8a63; --dn:#c7334b; --warn:#a97a00;
+  --up-bg:#0f8a6317; --dn-bg:#c7334b17; --warn-bg:#a97a0017; --accent-bg:#1f6fae14; color-scheme:light;}
+:root[data-theme="dark"]{color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-sans);
+  padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.lbl{font:600 11px/1 var(--f-cond);letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+h1{font:600 20px/1.1 var(--f-cond);letter-spacing:.02em;margin:0;text-wrap:balance}
+h1 span{color:var(--mut);font-weight:500}
+.hdr-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 10px;font:500 12px/1.2 var(--f-mono);color:var(--mut)}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block}
+.chip.live i{background:var(--up)} .chip.warn i{background:var(--warn)} .chip.bad i{background:var(--dn)}
+.chip.live{color:var(--fg)}
+.banner{border:1px solid var(--line);border-left:3px solid var(--warn);background:var(--warn-bg);border-radius:6px;padding:10px 12px;font-size:13px}
+.banner.bad{border-left-color:var(--dn);background:var(--dn-bg)}
+.banner[hidden]{display:none}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--mut);font:600 13px/1 var(--f-cond);letter-spacing:.05em;padding:9px 14px;border-radius:6px;cursor:pointer}
+.tab[aria-pressed="true"]{color:var(--fg);border-color:var(--accent);background:var(--accent-bg)}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px}
+@media(max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.panel h2{margin:0 0 12px;font:600 11px/1 var(--f-cond);letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+.hero{display:flex;flex-direction:column;gap:14px}
+.act-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 22px}
+.act{font:600 54px/0.95 var(--f-cond);letter-spacing:.01em}
+.act.UP{color:var(--up)} .act.DOWN{color:var(--dn)} .act.NO-TRADE{color:var(--mut)} .act.WAIT{color:var(--warn)} .act.STALE{color:var(--warn)}
+.why{color:var(--mut);max-width:46ch;font-size:13px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 16px}
+.kv div{min-width:0}
+.kv .v{font:500 17px/1.3 var(--f-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kv .lbl{display:block;margin-bottom:4px}
+.gauge{position:relative;height:30px}
+.gauge .track{position:absolute;inset:11px 0 auto;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--dn-bg),var(--panel2) 50%,var(--up-bg));border:1px solid var(--line)}
+.gauge .mid{position:absolute;left:50%;top:6px;width:1px;height:18px;background:var(--dim)}
+.gauge .mk{position:absolute;top:4px;width:4px;height:22px;margin-left:-2px;border-radius:2px;background:var(--fg);transition:left .4s}
+.gscale{display:flex;justify-content:space-between;font:500 11px var(--f-mono);color:var(--dim)}
+.timeline{position:relative;height:34px}
+.timeline .bar{position:absolute;inset:14px 0 auto;height:6px;background:var(--panel2);border:1px solid var(--line);border-radius:3px}
+.timeline .zone{position:absolute;top:14px;height:6px;background:var(--accent);opacity:.55;border-radius:2px}
+.timeline .now{position:absolute;top:8px;width:2px;height:18px;background:var(--fg);margin-left:-1px}
+.tl-l{display:flex;justify-content:space-between;font:500 11px var(--f-mono);color:var(--dim)}
+form.tk{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fld input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:9px 10px;font:500 16px var(--f-mono)}
+.hint{color:var(--mut);font-size:12px}
+.edge-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.edge-row .box{border:1px solid var(--line);border-radius:6px;padding:10px;background:var(--panel2);min-width:0}
+.edge-row .v{font:600 17px var(--f-mono);margin-top:5px;overflow-wrap:anywhere}
+.pos{color:var(--up)} .neg{color:var(--dn)}
+.thr{margin-top:14px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.thr div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:8px}
+.thr b{font:600 14px var(--f-mono)}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--mut);font:500 11px var(--f-mono)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{font:600 11px/1 var(--f-cond);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);font:500 13px var(--f-mono);font-variant-numeric:tabular-nums}
+tr.sel td{background:var(--accent-bg)}
+tr.row{cursor:pointer}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font:600 11px var(--f-cond);letter-spacing:.06em}
+.pill.UP{background:var(--up-bg);color:var(--up)} .pill.DOWN{background:var(--dn-bg);color:var(--dn)}
+.pill.NO-TRADE{background:var(--panel2);color:var(--mut)} .pill.WAIT,.pill.STALE{background:var(--warn-bg);color:var(--warn)}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.log{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:auto;font:500 12px var(--f-mono)}
+.log div{display:flex;flex-wrap:wrap;gap:4px 12px;border-bottom:1px solid var(--line);padding-bottom:6px;color:var(--mut)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.notes p{margin:0 0 8px;color:var(--mut);font-size:13px;max-width:62ch}
+.notes p b{color:var(--fg);font-weight:600}
+.notes ul{margin:0;padding-left:18px;color:var(--mut);font-size:13px}
+.notes li{margin-bottom:6px}
+footer{color:var(--dim);font-size:12px}
+@media(prefers-reduced-motion:reduce){.gauge .mk{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Kalshi 15m Signal Desk <span>/ UP-DOWN windows, BTC ETH SOL XRP</span></h1>
+    <div class="hdr-r">
+      <span class="chip mono" id="clock">--:--:-- UTC</span>
+      <span class="chip" id="conn"><i></i><span id="conn-t">Connecting</span></span>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="tabs" role="group" aria-label="Asset" id="tabs"></div>
+
+  <div class="grid2">
+    <section class="panel hero" aria-live="polite">
+      <h2 id="hero-h">Signal</h2>
+      <div class="act-row">
+        <div class="act WAIT" id="act">--</div>
+        <div class="why" id="why">Waiting for market data.</div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:6px">Model probability the window closes UP</div>
+        <div class="gauge"><div class="track"></div><div class="mid"></div><div class="mk" id="mk" style="left:50%"></div></div>
+        <div class="gscale"><span>0% DOWN</span><span class="mono" id="pup">--</span><span>100% UP</span></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:6px">Window clock (decision zone shaded)</div>
+        <div class="timeline"><div class="bar"></div><div class="zone" id="zone"></div><div class="now" id="now" style="left:0"></div></div>
+        <div class="tl-l"><span>open</span><span id="tl-m">minute --</span><span>settles</span></div>
+      </div>
+      <div class="kv">
+        <div><span class="lbl">Price now</span><span class="v" id="k-px">--</span></div>
+        <div><span class="lbl">Window open ref</span><span class="v" id="k-ref">--</span></div>
+        <div><span class="lbl">Move vs ref</span><span class="v" id="k-mv">--</span></div>
+        <div><span class="lbl">Distance (z, sigma)</span><span class="v" id="k-z">--</span></div>
+        <div><span class="lbl">Minute vol</span><span class="v" id="k-vol">--</span></div>
+        <div><span class="lbl">Data age</span><span class="v" id="k-age">--</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Kalshi quote ticket</h2>
+      <form class="tk" id="tk" autocomplete="off">
+        <div class="fld"><label class="lbl" for="ya">YES ask (cents)</label><input id="ya" inputmode="numeric" placeholder="e.g. 54"></div>
+        <div class="fld"><label class="lbl" for="na">NO ask (cents)</label><input id="na" inputmode="numeric" placeholder="e.g. 48"></div>
+      </form>
+      <p class="hint" style="margin:10px 0 0">Type the live asks from the Kalshi market for this window. No Kalshi data connector is available to this page, so the edge below uses what you enter.</p>
+      <div class="edge-row">
+        <div class="box"><div class="lbl">Edge UP</div><div class="v" id="e-up">--</div></div>
+        <div class="box"><div class="lbl">Edge DOWN</div><div class="v" id="e-dn">--</div></div>
+        <div class="box"><div class="lbl">Stake</div><div class="v" id="stake">--</div></div>
+      </div>
+      <div class="thr">
+        <div><span>Buy UP only if YES ask is at or below</span><b id="th-up">--</b></div>
+        <div><span>Buy DOWN only if NO ask is at or below</span><b id="th-dn">--</b></div>
+        <div><span>Edge = P(win) - ask - fee, per $1 contract</span><b id="th-fee">--</b></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2 id="ch-h">Last 30 minutes, 1-minute closes</h2>
+    <div id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Asset board</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Asset</th><th>Price</th><th>Move vs ref</th><th>z</th><th>P(up)</th><th>Minute</th><th>State</th></tr></thead>
+      <tbody id="board"></tbody>
+    </table></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <h2>Risk settings</h2>
+      <form class="settings" id="set" autocomplete="off">
+        <div class="fld"><label class="lbl" for="s-edge">Min edge ($)</label><input id="s-edge" inputmode="decimal"></div>
+        <div class="fld"><label class="lbl" for="s-kelly">Kelly multiple</label><input id="s-kelly" inputmode="decimal"></div>
+        <div class="fld"><label class="lbl" for="s-cap">Max stake (% bankroll)</label><input id="s-cap" inputmode="decimal"></div>
+        <div class="fld"><label class="lbl" for="s-bank">Bankroll ($)</label><input id="s-bank" inputmode="decimal"></div>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>Signal log (this session)</h2>
+      <div class="log" id="log"><div>No signal changes yet.</div></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Method and validation status</h2>
+    <div class="notes">
+      <div>
+        <p><b>Probability.</b> Random-walk model: P(up) = Phi(z), where z is the log distance from the window-open reference divided by minute volatility times the square root of minutes left. Volatility is an exponentially weighted estimate over 60 one-minute returns.</p>
+        <p><b>Decision.</b> A signal needs a decision minute between 3 and 10, fresh data, and edge after the Kalshi taker fee at or above your minimum. Stake is fractional Kelly with a hard cap.</p>
+      </div>
+      <div>
+        <p><b>What has been tested.</b> The Python engine in this repo passed synthetic tests: on a pure random walk it reported no significant edge, and with a planted drift it detected the edge. The full engine adds a walk-forward logistic layer that this page does not run.</p>
+        <p><b>What has not.</b> Nothing here is validated on real Kalshi history or real Kalshi prices. A signal is a model estimate, not a prediction of the outcome, and no model wins every window.</p>
+      </div>
+      <div>
+        <ul>
+          <li>Spot candles come from Twelve Data through your connector, as a proxy for the CF Benchmarks index Kalshi settles on.</li>
+          <li>Window references use the last closed 1-minute bar, not the 60-second index average.</li>
+          <li>Fee formula, series coverage and tie rules need checking against Kalshi's current rulebook.</li>
+          <li>Run the backtest on your own data before sizing real money.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <footer id="foot">Signals only. This page places no orders.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var SERVER="Twelve Data", TOOL="get_time_series", MIN=60000, WIN=15*MIN;
+var ASSETS={BTC:"BTC/USD",ETH:"ETH/USD",SOL:"SOL/USD",XRP:"XRP/USD"};
+var KEYS=Object.keys(ASSETS);
+var S={asset:"BTC",bars:{},err:{},updated:{},mode:"init",
+  asks:{},cfg:{minEdge:0.04,kelly:0.25,cap:2,bank:1000,feeRate:0.07,minM:3,maxM:10},
+  log:[],lastAct:{},unsub:[]};
+KEYS.forEach(function(k){S.asks[k]={y:"",n:""};});
+
+/* ---------- persistence (per-viewer convenience only) ---------- */
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+try{var saved=JSON.parse(lsGet("k15.state")||"null");
+  if(saved){if(saved.asset&&ASSETS[saved.asset])S.asset=saved.asset;
+    if(saved.cfg)for(var kk in saved.cfg)if(typeof saved.cfg[kk]==="number"&&isFinite(saved.cfg[kk]))S.cfg[kk]=saved.cfg[kk];}}catch(e){}
+function persist(){lsSet("k15.state",JSON.stringify({asset:S.asset,cfg:S.cfg}));}
+
+/* ---------- math ---------- */
+function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);
+  var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function Phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function fee(a){var r=S.cfg.feeRate;return Math.ceil(Math.round(r*a*(1-a)*100*1e9)/1e9)/100;}
+function ewmStd(x,span){var al=2/(span+1),n=x.length,sw=0,sw2=0,sx=0;
+  for(var i=0;i<n;i++){var w=Math.pow(1-al,n-1-i);sw+=w;sw2+=w*w;sx+=w*x[i];}
+  var mu=sx/sw,v=0;for(var j=0;j<n;j++){var w2=Math.pow(1-al,n-1-j);v+=w2*Math.pow(x[j]-mu,2);}
+  v/=sw;var d=1-sw2/(sw*sw);return d>0?Math.sqrt(v/d):NaN;}
+function maxAsk(p,minEdge){for(var c=99;c>=1;c--){var a=c/100;if(p-a-fee(a)>=minEdge-1e-9)return c;}return null;}
+function kelly(p,a){var cost=a+fee(a);if(cost>=1)return 0;var b=(1-cost)/cost;return Math.max(0,(p*b-(1-p))/b);}
+function utc(ms){var d=new Date(ms);return ("0"+d.getUTCHours()).slice(-2)+":"+("0"+d.getUTCMinutes()).slice(-2);}
+function money(x){return (x<0?"-":"")+"$"+Math.abs(x).toFixed(3);}
+function px(x){return x>=1000?x.toLocaleString("en-US",{maximumFractionDigits:2,minimumFractionDigits:2}):x.toFixed(x>=10?3:4);}
+
+/* ---------- analysis: only closed 1m bars, same window convention as the Python engine ---------- */
+function analyze(asset,nowMs){
+  var bars=S.bars[asset];if(!bars||bars.length<80)return {error:"Not enough candles yet"};
+  var closed=bars.filter(function(b){return b.t+MIN<=nowMs;});
+  if(closed.length<80)return {error:"Not enough closed candles"};
+  var last=closed[closed.length-1],lastEnd=last.t+MIN,t0=Math.floor(lastEnd/WIN)*WIN,m=(lastEnd-t0)/MIN;
+  var refBar=null;for(var i=closed.length-1;i>=0;i--){if(closed[i].t===t0-MIN){refBar=closed[i];break;}if(closed[i].t<t0-MIN)break;}
+  if(!refBar)return {error:"Window-open reference candle missing"};
+  var rets=[];for(var k=1;k<closed.length;k++)rets.push(Math.log(closed[k].c/closed[k-1].c));
+  var sig=ewmStd(rets.slice(-300),60);
+  var r={asset:asset,t0:t0,m:m,K:refBar.c,S:last.c,age:nowMs-lastEnd,sig:sig,closed:closed};
+  r.dist=Math.log(last.c/refBar.c);
+  var tau=15-m;
+  r.z=(m>=1&&isFinite(sig)&&sig>0)?Math.max(-6,Math.min(6,r.dist/(sig*Math.sqrt(tau)))):0;
+  r.p=m>=1?Phi(r.z):0.5;
+  r.stale=r.age>150000;
+  return r;
+}
+function decide(a,asks){
+  var c=S.cfg;
+  if(a.error)return {act:"WAIT",why:a.error};
+  if(a.stale)return {act:"STALE",why:"Latest candle is "+Math.round(a.age/1000)+"s old. No signal until data refreshes."};
+  if(a.m<c.minM)return {act:"WAIT",why:"Window opened "+a.m+" min ago. Signals start at minute "+c.minM+" so the move is measurable."};
+  if(a.m>c.maxM)return {act:"WAIT",why:"Past minute "+c.maxM+". Too little time left for a reliable edge. Next window opens at "+utc(a.t0+WIN)+" UTC."};
+  var ya=asks.y===""?null:asks.y/100,na=asks.n===""?null:asks.n/100;
+  if(ya===null||na===null||!(ya>0&&ya<1&&na>0&&na<1))
+    return {act:"NO-TRADE",why:"Model leans "+(a.p>=0.5?"UP":"DOWN")+" at "+(Math.max(a.p,1-a.p)*100).toFixed(1)+"%. Enter the Kalshi asks to see whether the price leaves any edge.",needAsks:true};
+  var eu=a.p-ya-fee(ya),ed=(1-a.p)-na-fee(na);
+  var out={eu:eu,ed:ed,ya:ya,na:na};
+  if(eu>=c.minEdge&&eu>=ed){out.act="UP";out.f=Math.min(c.cap/100,c.kelly*kelly(a.p,ya));out.why="YES ask "+Math.round(ya*100)+"c is below the model's fair value after fees.";}
+  else if(ed>=c.minEdge){out.act="DOWN";out.f=Math.min(c.cap/100,c.kelly*kelly(1-a.p,na));out.why="NO ask "+Math.round(na*100)+"c is below the model's fair value after fees.";}
+  else{out.act="NO-TRADE";out.why="Best edge "+money(Math.max(eu,ed))+" is below your "+money(c.minEdge)+" minimum.";}
+  return out;
+}
+
+/* ---------- data: Twelve Data via the viewer's connector ---------- */
+function resultText(res){
+  var p=res&&res.payload;
+  if(p&&typeof p==="object"&&typeof p.result==="string")return p.result;
+  if(typeof p==="string")return p;
+  var sc=res&&res.structuredContent;if(sc&&typeof sc.result==="string")return sc.result;
+  var tb=((res&&res.content)||[]).filter(function(b){return b.type==="text";})[0];
+  if(tb){try{var j=JSON.parse(tb.text);if(j&&typeof j.result==="string")return j.result;if(j&&j.values)return tb.text;}catch(e){}return tb.text;}
+  return "";
+}
+function parseBars(text){
+  var out=[];if(!text)return out;
+  if(text.trim().charAt(0)==="{"){try{var j=JSON.parse(text);(j.values||[]).forEach(function(v){
+    var t=Date.parse(String(v.datetime).replace(" ","T")+"Z");if(isFinite(t))out.push({t:t,o:+v.open,h:+v.high,l:+v.low,c:+v.close});});}catch(e){}}
+  else{text.split("\n").forEach(function(line,i){if(!i||!line.trim())return;var f=line.split(";");
+    var t=Date.parse(f[0].replace(" ","T")+"Z");if(isFinite(t)&&f.length>=5)out.push({t:t,o:+f[1],h:+f[2],l:+f[3],c:+f[4]});});}
+  out=out.filter(function(b){return isFinite(b.c)&&b.c>0;});
+  out.sort(function(a,b){return a.t-b.t;});return out;
+}
+function errMsg(e){
+  var c=e&&e.code;
+  if(c==="server_not_connected"||c==="selection_required")return {t:"warn",m:"Twelve Data is not connected. Add it in claude.ai Settings, Connectors, then reload this page."};
+  if(c==="needs_reauth")return {t:"warn",m:"Twelve Data needs to be reconnected. Reconnect it in claude.ai Settings, Connectors."};
+  if(c==="not_in_manifest"||c==="approval_required"||c==="consent_required"||c==="blocked_by_policy")return {t:"warn",m:"This page is not allowed to read Twelve Data. Allow the connector for this page, then reload."};
+  if(c==="server_unavailable"||c==="rate_limited")return {t:"warn",m:"Twelve Data is busy or rate limited. Keeping the last good candles and retrying."};
+  if(c==="tool_error")return {t:"warn",m:"Twelve Data rejected the request: "+String(e.message||"").slice(0,160)};
+  return {t:"warn",m:"Market data request failed ("+(c||"unknown")+"). Keeping the last good candles."};
+}
+var mcp=null;
+function onResult(asset,res){
+  var b=parseBars(resultText(res));
+  if(b.length>=80){S.bars[asset]=b;S.err[asset]=null;S.updated[asset]=(res.cache&&res.cache.storedAt)||Date.now();}
+  else S.err[asset]={t:"warn",m:"Twelve Data returned too few candles for "+asset+"."};
+}
+function startWatches(){
+  S.unsub.forEach(function(u){try{u();}catch(e){}});S.unsub=[];
+  if(!mcp)return;
+  KEYS.forEach(function(k){
+    var every=k===S.asset?30000:120000;
+    var u=mcp.watchTool(SERVER,TOOL,{symbol:ASSETS[k],interval:"1min",outputsize:300},function(ev){
+      if(ev.type==="data")onResult(k,ev.result);else S.err[k]=errMsg(ev.error);
+      render();
+    },{refetchInterval:every,cache:{staleTime:every-2000}});
+    S.unsub.push(u);
+  });
+}
+
+/* ---------- sample mode (only when the page cannot reach connectors) ---------- */
+function sampleBars(asset){
+  var seed=0;for(var i=0;i<asset.length;i++)seed=(seed*31+asset.charCodeAt(i))>>>0;
+  function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+  function gauss(){var u=0,v=0;while(!u)u=rnd();v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  var base={BTC:80000,ETH:2600,SOL:170,XRP:2.4}[asset],end=Math.floor(Date.now()/MIN)*MIN,n=300,p=base,out=[];
+  for(var j=n-1;j>=0;j--){var o=p;p=p*Math.exp(0.0006*gauss());out.push({t:end-j*MIN,o:o,h:Math.max(o,p),l:Math.min(o,p),c:p});}
+  return out;
+}
+
+/* ---------- rendering ---------- */
+function $(id){return document.getElementById(id);}
+function tone(el,v){el.classList.remove("pos","neg");if(v>0)el.classList.add("pos");else if(v<0)el.classList.add("neg");}
+var cur={};
+function render(){
+  var now=Date.now();
+  $("clock").textContent=new Date(now).toISOString().slice(11,19)+" UTC";
+  var conn=$("conn"),ct=$("conn-t"),ban=$("banner");
+  var live=KEYS.some(function(k){return S.bars[k];});
+  var errs=KEYS.map(function(k){return S.err[k];}).filter(Boolean);
+  conn.className="chip"+(S.mode==="sample"?" warn":live&&!errs.length?" live":errs.length?" warn":"");
+  ct.textContent=S.mode==="sample"?"Sample data":live?(errs.length?"Degraded":"Live"):S.mode==="init"?"Connecting":"No data";
+  if(S.mode==="sample"){ban.hidden=false;ban.className="banner";ban.textContent="Sample data. This page could not reach your connectors, so the numbers below are generated placeholders and are not market prices. Open it inside claude.ai with Twelve Data connected for live signals.";}
+  else if(errs.length){ban.hidden=false;ban.className="banner";ban.textContent=errs[0].m+(errs.length>1?" ("+errs.length+" assets affected.)":"");}
+  else ban.hidden=true;
+
+  var rows=[];cur={};
+  KEYS.forEach(function(k){var a=S.bars[k]?analyze(k,now):{error:"No data"};cur[k]={a:a,d:decide(a,S.asks[k])};});
+  var A=cur[S.asset].a,D=cur[S.asset].d;
+
+  $("hero-h").textContent=S.asset+" / USD, window "+(A.t0?utc(A.t0)+" to "+utc(A.t0+WIN)+" UTC":"--");
+  var act=$("act");act.textContent=D.act;act.className="act "+D.act;$("why").textContent=D.why;
+  var p=A.error?0.5:A.p;$("mk").style.left=(p*100)+"%";$("pup").textContent=A.error?"--":(p*100).toFixed(1)+"%";
+  if(!A.error){
+    $("k-px").textContent=px(A.S);$("k-ref").textContent=px(A.K);
+    var mv=(A.S/A.K-1)*100;$("k-mv").textContent=(mv>=0?"+":"")+mv.toFixed(3)+"%";tone($("k-mv"),mv);
+    $("k-z").textContent=(A.z>=0?"+":"")+A.z.toFixed(2);tone($("k-z"),A.z);
+    $("k-vol").textContent=(A.sig*100).toFixed(3)+"%";
+    $("k-age").textContent=Math.round(A.age/1000)+"s";$("k-age").className="v "+(A.stale?"neg":"");
+    var mf=Math.min(15,A.m);$("now").style.left=(mf/15*100)+"%";
+    $("zone").style.left=(S.cfg.minM/15*100)+"%";$("zone").style.width=((S.cfg.maxM-S.cfg.minM)/15*100)+"%";
+    $("tl-m").textContent="minute "+A.m+" of 15";
+  }else{["k-px","k-ref","k-mv","k-z","k-vol","k-age"].forEach(function(i){$(i).textContent="--";});$("tl-m").textContent="minute --";}
+
+  var tk=D,eu=$("e-up"),ed=$("e-dn");
+  if(tk.eu!==undefined){eu.textContent=money(tk.eu);ed.textContent=money(tk.ed);tone(eu,tk.eu-S.cfg.minEdge+1e-9);tone(ed,tk.ed-S.cfg.minEdge+1e-9);}
+  else{eu.textContent="--";ed.textContent="--";eu.className="v";ed.className="v";}
+  $("stake").textContent=tk.f?(tk.f*100).toFixed(2)+"% / $"+(tk.f*S.cfg.bank).toFixed(2):"--";
+  if(!A.error&&A.m>=1){
+    var mu=maxAsk(A.p,S.cfg.minEdge),md=maxAsk(1-A.p,S.cfg.minEdge);
+    $("th-up").textContent=mu===null?"never":mu+"c";$("th-dn").textContent=md===null?"never":md+"c";
+    $("th-fee").textContent="fee "+(fee(0.5)*100).toFixed(0)+"c at 50c";
+  }else{$("th-up").textContent="--";$("th-dn").textContent="--";$("th-fee").textContent="--";}
+
+  drawChart(A);
+  var tb=$("board");tb.textContent="";
+  KEYS.forEach(function(k){var c=cur[k],a=c.a,tr=document.createElement("tr");tr.className="row"+(k===S.asset?" sel":"");
+    function td(txt,cls){var e=document.createElement("td");e.textContent=txt;if(cls)e.className=cls;tr.appendChild(e);return e;}
+    td(k);
+    if(a.error){td("--");td("--");td("--");td("--");td("--");}
+    else{var m=(a.S/a.K-1)*100;td(px(a.S));td((m>=0?"+":"")+m.toFixed(3)+"%",m>=0?"pos":"neg");
+      td((a.z>=0?"+":"")+a.z.toFixed(2));td(a.m<1?"--":(a.p*100).toFixed(1)+"%");td(a.m+"/15");}
+    var st=document.createElement("td"),pl=document.createElement("span");pl.className="pill "+c.d.act;pl.textContent=c.d.act;st.appendChild(pl);tr.appendChild(st);
+    tr.onclick=function(){selectAsset(k);};tb.appendChild(tr);
+  });
+  logChanges();
+}
+function drawChart(A){
+  var box=$("chart");
+  if(A.error){box.textContent="Chart appears when candles load.";return;}
+  var W=760,H=230,L=64,R=14,T=14,B=28,t0=A.t0,x0=t0-WIN,x1=t0+WIN;
+  var pts=A.closed.filter(function(b){return b.t+MIN>x0;}).slice(-31);
+  var lo=Math.min(A.K,Math.min.apply(null,pts.map(function(b){return b.c;}))),hi=Math.max(A.K,Math.max.apply(null,pts.map(function(b){return b.c;})));
+  var pad=(hi-lo)*0.12||hi*0.0005;lo-=pad;hi+=pad;
+  function X(t){return L+(t-x0)/(x1-x0)*(W-L-R);}function Y(v){return T+(hi-v)/(hi-lo)*(H-T-B);}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="One-minute closes for the previous and current window with the opening reference line">';
+  var ticks=[lo+pad,A.K,hi-pad];
+  s+='<rect x="'+X(t0+S.cfg.minM*MIN)+'" y="'+T+'" width="'+(X(t0+S.cfg.maxM*MIN)-X(t0+S.cfg.minM*MIN))+'" height="'+(H-T-B)+'" fill="var(--accent)" fill-opacity="0.12"/>';
+  ticks.forEach(function(v){s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)" stroke-width="1"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" text-anchor="end">'+px(v)+'</text>';});
+  s+='<line x1="'+X(t0)+'" x2="'+X(t0)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 3"/>';
+  s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(A.K)+'" y2="'+Y(A.K)+'" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="6 4"/>';
+  var d=pts.map(function(b,i){return (i?"L":"M")+X(b.t+MIN).toFixed(1)+" "+Y(b.c).toFixed(1);}).join(" ");
+  s+='<path d="'+d+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>';
+  var lp=pts[pts.length-1];s+='<circle cx="'+X(lp.t+MIN)+'" cy="'+Y(lp.c)+'" r="4.5" fill="'+(A.S>=A.K?"var(--up)":"var(--dn)")+'"/>';
+  [[x0,"start"],[t0,"open"],[x1,"settle"]].forEach(function(p,i){s+='<text x="'+X(p[0])+'" y="'+(H-8)+'" text-anchor="'+(i===0?"start":i===2?"end":"middle")+'">'+utc(p[0])+' '+p[1]+'</text>';});
+  s+='</svg>';box.innerHTML=s;
+  $("ch-h").textContent=S.asset+" last 30 minutes, 1-minute closes. Dashed amber line is the opening reference.";
+}
+function logChanges(){
+  KEYS.forEach(function(k){var c=cur[k];if(c.a.error)return;
+    var key=utc(c.a.t0)+"|"+c.d.act;
+    if((c.d.act==="UP"||c.d.act==="DOWN")&&S.lastAct[k]!==key){S.lastAct[k]=key;
+      S.log.unshift({t:Date.now(),k:k,act:c.d.act,p:c.a.p,m:c.a.m,w:utc(c.a.t0)});S.log=S.log.slice(0,40);
+      var l=$("log");l.textContent="";S.log.forEach(function(e){var d=document.createElement("div");
+        var a=document.createElement("span");a.textContent=utc(e.t)+" UTC";var b=document.createElement("b");b.textContent=e.k+" "+e.act;b.className=e.act==="UP"?"pos":"neg";
+        var c2=document.createElement("span");c2.textContent="P(up) "+(e.p*100).toFixed(1)+"%, window "+e.w+", min "+e.m;d.append(a,b,c2);l.appendChild(d);});}
+  });
+}
+function selectAsset(k){S.asset=k;persist();buildTabs();$("ya").value=S.asks[k].y;$("na").value=S.asks[k].n;startWatches();render();}
+function buildTabs(){var t=$("tabs");t.textContent="";KEYS.forEach(function(k){var b=document.createElement("button");b.type="button";b.className="tab";b.textContent=k;b.setAttribute("aria-pressed",k===S.asset?"true":"false");b.onclick=function(){selectAsset(k);};t.appendChild(b);});}
+
+/* ---------- wiring ---------- */
+function bindAsk(id,key){$(id).addEventListener("input",function(e){var v=e.target.value.replace(/[^0-9]/g,"").slice(0,2);e.target.value=v;S.asks[S.asset][key]=v===""?"":+v;render();});}
+bindAsk("ya","y");bindAsk("na","n");
+$("tk").addEventListener("submit",function(e){e.preventDefault();});$("set").addEventListener("submit",function(e){e.preventDefault();});
+[["s-edge","minEdge",1],["s-kelly","kelly",1],["s-cap","cap",1],["s-bank","bank",1]].forEach(function(r){
+  var el=$(r[0]);el.value=S.cfg[r[1]];
+  el.addEventListener("change",function(){var v=parseFloat(el.value);if(isFinite(v)&&v>=0){S.cfg[r[1]]=v;persist();}else el.value=S.cfg[r[1]];render();});
+});
+buildTabs();$("ya").value="";$("na").value="";
+render();
+setInterval(render,1000);
+
+(function boot(){
+  var c=window.claude;
+  if(!c||!c.use){useSample();return;}
+  c.use("mcp").then(function(m){
+    if(!m){useSample();return;}
+    mcp=m;S.mode="live";startWatches();render();
+    setTimeout(function(){if(S.mode==="live"&&!KEYS.some(function(k){return S.bars[k];})&&!KEYS.some(function(k){return S.err[k];})){render();}},8000);
+  }).catch(useSample);
+  function useSample(){S.mode="sample";var gen=function(){KEYS.forEach(function(k){S.bars[k]=sampleBars(k);});};gen();setInterval(gen,30000);render();}
+})();
+})();
+</script>
