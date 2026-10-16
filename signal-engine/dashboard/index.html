@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalshi 15m Signals</title>
+<style>
+:root{--bg:#0f1115;--fg:#e8eaed;--mut:#8b93a1;--up:#2ecc71;--dn:#e74c3c;--card:#181b22}
+@media(prefers-color-scheme:light){:root{--bg:#fff;--fg:#14171c;--mut:#5f6773;--card:#f3f4f6}}
+body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif}
+.card{background:var(--card);border-radius:10px;padding:14px;margin:12px 0}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #8883}
+.UP{color:var(--up);font-weight:700}.DOWN{color:var(--dn);font-weight:700}.m{color:var(--mut)}
+</style></head><body>
+<h1>Kalshi 15-minute signals</h1>
+<p class="m">Load the <code>signals.jsonl</code> file written by <code>kalshi15 signal --out signals.jsonl --loop</code>. Signals are model estimates, not guarantees.</p>
+<input type="file" id="f" accept=".jsonl,.json,.txt">
+<div id="latest" class="card">No data loaded.</div>
+<div class="card"><table id="t"><thead><tr><th>Window (UTC)</th><th>Asset</th><th>Min</th><th>Action</th><th>P(up)</th><th>Edge</th><th>Stake</th><th>Reason</th></tr></thead><tbody></tbody></table></div>
+<script>
+document.getElementById('f').onchange=async e=>{
+  const rows=(await e.target.files[0].text()).split('\n').filter(Boolean).map(l=>JSON.parse(l)).reverse();
+  const tb=document.querySelector('#t tbody');tb.textContent='';
+  for(const r of rows.slice(0,200)){
+    const tr=tb.insertRow();
+    [r.window_open.slice(0,16),r.asset,r.minute,r.action,(r.p_up*100).toFixed(1)+'%',
+     r.edge==null?'-':'$'+r.edge.toFixed(3),(r.stake_frac*100).toFixed(1)+'%',r.reason]
+     .forEach((v,i)=>{const c=tr.insertCell();c.textContent=v;if(i==3)c.className=r.action});
+  }
+  const l=rows[0];
+  document.getElementById('latest').textContent=l?`${l.asset} ${l.window_open.slice(11,16)} UTC: ${l.action} (P up ${(l.p_up*100).toFixed(1)}%, edge ${l.edge??'n/a'})`:'No data.';
+};
+</script></body></html>
