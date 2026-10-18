@@ -5,3 +5,4 @@ __pycache__/
 data/
 signals.jsonl
 .pytest_cache/
+*.egg-info/
